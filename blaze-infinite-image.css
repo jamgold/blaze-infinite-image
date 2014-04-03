@@ -1,0 +1,52 @@
+/* CSS declarations go here */
+
+body {
+	font-size: 14px;
+	font-family: sans-serif;
+	background-color: white;
+	padding:0;
+}
+#title {
+	position: fixed;
+	top:0px;
+	left:0px;
+	background-color:#eee;
+	height: 120px;
+	width: 100%;
+	z-index: 10;
+	opacity: .9;
+}
+#title .container {
+	padding:1em;
+}
+ul {
+	list-style: none;
+	list-style-position: inside;
+	margin:120px 0 0 0;
+	padding:0;
+	text-align: center;
+}
+ul li {
+	position: relative;
+	margin:0;
+}
+ul li img {
+	width:40%;
+}
+ul li span {
+	position: absolute;
+	left:45%;
+	top:10%;
+	font-size: 90pt;
+	color:white;
+	opacity: 0.7;
+}
+ul li span:hover {
+	opacity: 1.0;
+	color:red;
+	background-color: yellow;
+}
+hr {
+	width: 25%;
+	text-align: center;
+}

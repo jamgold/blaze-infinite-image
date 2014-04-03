@@ -1,0 +1,39 @@
+<head>
+  <title>Endless Images</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+  {{> hello}}
+  {{> endless}}
+</body>
+
+<template name="hello">
+	<div id="title">
+	  <div class="container">
+	    <div class="row">
+	      <div class="span12">
+	      <h1>Endless Images!</h1>
+	      {{{greeting}}}. You scroll up and down and the previous/next images will be loaded. Click on an image to delete it. The number on the image is used for sorting purposes only and has no other meaning. The images are from a public Flickr Feed.
+	      </div>
+	    </div>
+	  </div>
+	</div>
+</template>
+
+<template name="endless">
+  <hr id="top">
+  <ul id="endless">
+  {{#each images}}
+    {{>image}}  
+  {{/each}}
+  </ul>
+  <hr id="bottom">
+</template>
+
+<template name="image">
+	<li class="item" id="{{_id}}">
+    <span class="number">{{n}}</span>
+    <img src="{{url}}" title="{{_id}}" alt="Owl Image">
+  </li>
+</template>
