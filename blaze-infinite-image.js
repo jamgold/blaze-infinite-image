@@ -158,7 +158,6 @@ Meteor.methods({
     {
       // this runs on the client
       // the return value will be in the result parameter of the async callback
-      Session.set("imagesTotal", "how many images total");
       return "counting images";
     }
     else
