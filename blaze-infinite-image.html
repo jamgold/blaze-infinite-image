@@ -15,7 +15,7 @@
 	    <div class="row">
 	      <div class="span12">
 	      <h1>Endless Images!</h1>
-	      {{{greeting}}}. You scroll up and down and the previous/next images will be loaded. Click on an image to delete it. The number on the image is used for sorting purposes only and has no other meaning. The images are from a public Flickr Feed. <a href="https://github.com/jamgold/blaze-infinite-image">source</a>
+	      Currently there are {{number_of_loaded_images}} of <span class=imagesTotal>{{imagesTotal}}</span> loaded in the collection (skip <a href="#" class="skip">{{skip}}</a>). You scroll up and down and the previous/next images will be loaded. Click on an image to delete it. The number on the image is used for sorting purposes only and has no other meaning. The images are from a public Flickr Feed. <a href="https://github.com/jamgold/blaze-infinite-image">source</a>
 	      </div>
 	    </div>
 	  </div>
@@ -23,18 +23,17 @@
 </template>
 
 <template name="endless">
-  <hr id="top">
-  <ul id="endless">
+  <div align="center">
+  <ul id="images">
   {{#each images}}
     {{>image}}  
   {{/each}}
   </ul>
-  <hr id="bottom">
+  </div>
 </template>
 
 <template name="image">
 	<li class="item" id="{{_id}}">
-    <span class="number">{{n}}</span>
     <img src="{{url}}" title="{{_id}}" alt="Owl Image">
   </li>
 </template>

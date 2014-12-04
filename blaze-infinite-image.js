@@ -1,17 +1,45 @@
 Images = new Meteor.Collection('images');
+dynamicLoad = true;
 
 if (Meteor.isClient) {
 
-  number_of_loaded_images = 4;
+  number_of_loaded_images = 10;
+  scrollTop = 0;
   Session.setDefault('imagesTotal', '*calculating*');
   Session.setDefault('number_of_visible_images', 5);
   Session.setDefault('skip',0);
 
-  Template.hello.greeting = function () {
-    return "Currently there are "+number_of_loaded_images+" of <span class=imagesTotal>"+Session.get('imagesTotal')+"</span> loaded in the collection (skip "+Session.get('skip')+')';
+  Template.hello.number_of_loaded_images = function() {
+    return number_of_loaded_images;
+  };
+  Template.hello.imagesTotal = function() {
+    return Session.get('imagesTotal');
+  };
+  Template.hello.skip = function() {
+    return Session.get('skip');
   };
 
   Template.hello.events({
+    'click a.skip': function(e,t) {
+      e.preventDefault();
+      var skip = Session.get('skip');
+      if(e.shiftKey)
+      {
+        if(skip>0)
+         Session.set('skip', skip-1);
+        else
+          console.log('can not go past 0');
+      }
+      else
+      {
+        Session.set('skip', skip+1);
+      }
+    },
+    'click h1': function(e,t) {
+      Meteor.call('renumberImages', function(err, result){
+        $(e.target).html(result);
+      })
+    },
     'click span.imagesTotal':function(e,t) {
       Meteor.call('getSomeImages', function(err, result){
         Session.set("imagesTotal", result);
@@ -20,27 +48,51 @@ if (Meteor.isClient) {
   })
 
   Template.endless.images = function() {
-    return Images.find();
+    return Images.find({},{sort:{n:1}});
   };
 
   Template.endless.rendered = function() {
     console.log('endless rendered');
     var $w = $(window);
     $w.on('scroll', function(){
-      var skip = Session.get('skip');
-      var b = $('#bottom').offset().top - $w.scrollTop() - $w.height();
-      var t = $('#top').offset().top - $w.scrollTop();
-      if(b <= 0)
+      var direction = '';
+      var st = $w.scrollTop();
+      if(st>scrollTop)
       {
-        Session.set('skip', skip+1);
-        Session.set('mode', 'append');
+        // down-scroll
+        direction = 'up';
       }
-      if(t >= 8) 
+      else
       {
-        if(skip > 0)
+        // up-scroll
+        direction = 'down';
+      }
+      scrollTop = st;
+      var skip = Session.get('skip');
+      var $images = $('ul li');
+      // we have n images, focus on the middle one
+      var $m = $($images[ parseInt(number_of_loaded_images/2) - 1 ]);
+      // $('ul li').removeClass('middle');
+      // $m.addClass('middle');
+      var t = $m.offset().top - $w.scrollTop();
+      console.log(direction+' top='+t+' window.height='+$w.height());
+      if(dynamicLoad)
+      {
+        if(direction == 'down' && t+100>$w.height())
         {
-          Session.set('mode', 'prepend');
-          Session.set('skip', skip-1);
+          if(skip > 0)
+          {
+            // scrollTop = $w.scrollTop();
+            Session.set('mode', 'prepend');
+            Session.set('skip', skip-1);
+          }
+        }
+
+        if(direction == 'up' && t <= -0)
+        {
+          // scrollTop = $w.scrollTop();
+          Session.set('mode', 'append');
+          Session.set('skip', skip+1);
         }
       }
     })
@@ -48,11 +100,14 @@ if (Meteor.isClient) {
 
   Template.image.rendered = function() {
     var id = this.$('li.item').attr('id');
+    console.log(id)
+  };
+  function f(){
     var $w = $(window);
-    console.log('image rendered '+id);
+    console.log(this.data.n+' image rendered '+id);
     if(Session.equals('mode','prepend'))
     {
-      var t = $('#top').offset().top - $w.scrollTop();
+      var t = $('ul li:first').offset().top - $w.scrollTop();
       $w.scrollTop(1);
       $('#endless').prepend($('#'+id));
     }
@@ -86,6 +141,7 @@ if (Meteor.isClient) {
       },
       onReady: function() {
         console.log('subscription ready');
+        // $(window).scrollTop(scrollTop);
       }
     });
   });
@@ -133,7 +189,13 @@ if (Meteor.isServer) {
       {
         console.log(error);
       }
-      else eval(result.content);
+      else
+      {
+        //
+        // this will call jsonFlickrFeed with the results
+        //
+        eval(result.content);
+      }
     });
   };
 
@@ -175,6 +237,22 @@ Meteor.methods({
     {
       getSomeImages();
       return Images.find().count();
+    }
+  },
+  renumberImages: function() {
+    if(this.isSimulation)
+    {
+      $('h1').html('Renumbering!');
+      return "renumbering";
+    }
+    else
+    {
+      var n = 1;
+      Images.find({},{sort:{n:1}}).forEach(function(image){
+        console.log(image._id+' now '+n);
+        Images.update({_id:image._id},{$set: {n: n++}});
+      });
+      return "Endless Images!";
     }
   }
 });
